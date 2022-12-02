@@ -30,6 +30,15 @@ namespace UserPermissionMapTests
         }
 
         [TestMethod]
+        public void GetNullPermissions()
+        {
+            List<int> p = null;
+
+            var map = new UsersPermissionsMap((int u) => { return p; });
+            Assert.AreEqual(map.GetUserPermission(1), null);
+        }
+
+        [TestMethod]
         public void GetPermissionsFor2Users()
         {
             var l1 = new List<int>();
