@@ -78,6 +78,30 @@ namespace UserPermissionMapTests
                 }
 
             }
+
+            public static void DoMany(UsersPermissionsMap m, int Size, Action ReportOK)
+            {
+                try
+                {
+                    for (int i = 0; i < Size; ++i)
+                    {
+                        var l = m.GetUserPermission(i);
+                        if (l.Count == 0)
+                            return;
+                        if (l[0] != i)
+                            return;
+                    }
+
+                    ReportOK();
+
+                }
+                catch (Exception e)
+                {
+
+                }
+
+            }
+
         }
 
         [TestMethod]
@@ -128,6 +152,47 @@ namespace UserPermissionMapTests
             var l3 = new List<int>(new int[] { 1, 2 });
             Assert.AreNotEqual(l1, l2);
             Assert.AreNotEqual(l2, l3);     // assert compares references and not the actual contents of the list
+        }
+
+        [TestMethod]
+        public void PerfTest()
+        {
+            int Size = 100;
+            Thread[] Threads = new Thread[Size];
+            bool[] TestsOK = new bool[Size];
+
+            var map = new UsersPermissionsMap((int u) => { return new List<int>(new int[] { u }); });
+            
+            for (int i = 0; i < Size; ++i)
+            {
+                int idx = i;        
+                Action a = () => { 
+                    lock (TestsOK) { 
+                        TestsOK[idx] = true;       // we have to capture idx and not i here - see
+                                                   // https://unicorn-dev.medium.com/how-to-capture-a-variable-in-c-and-not-to-shoot-yourself-in-the-foot-d169aa161aa6
+                    } 
+                };
+                Threads[i] = new Thread(() => TestThread.DoMany(map, Size, a));
+                Threads[i].Start();
+            }
+
+            bool Result = true;
+
+            for (int i = 0; i < Size; ++i)
+            {
+                Threads[i].Join();
+            }
+
+            lock (TestsOK)
+            {
+                for (int i = 0; i < Size; ++i)
+                {
+                    Result &= TestsOK[i];
+                }
+
+            }
+
+            Assert.IsTrue(Result);
         }
     }
 }

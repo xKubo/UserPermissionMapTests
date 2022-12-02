@@ -58,7 +58,7 @@ namespace DBOUtils
 
                 if (lup.m_Status == Status.Pending)
                 {
-                    Monitor.Wait(m_Lock);           // wait until someone updates the data
+                    Monitor.Wait(lup.m_Lock);           // wait until someone updates the data
                     if (lup.m_Exception != null)
                         throw lup.m_Exception;
                     else
