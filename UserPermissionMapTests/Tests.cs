@@ -95,9 +95,9 @@ namespace UserPermissionMapTests
                     ReportOK();
 
                 }
-                catch (Exception e)
+                catch (Exception )
                 {
-
+                    
                 }
 
             }
@@ -107,7 +107,7 @@ namespace UserPermissionMapTests
         [TestMethod]
         public void ThreadWaitsUntilDataAvailable()
         {
-            int SleepTimeInMS = 300;
+            int SleepTimeInMS = 500;
             int Counter = 0;
             bool ListsEqual = false;
             var l = new List<int>(new int[] { 2, 3, 4 });
@@ -155,9 +155,9 @@ namespace UserPermissionMapTests
         }
 
         [TestMethod]
-        public void PerfTest()
+        public void NThreadsReceiveNUserPermissions()
         {
-            int Size = 100;
+            int Size = 1000;
             Thread[] Threads = new Thread[Size];
             bool[] TestsOK = new bool[Size];
 

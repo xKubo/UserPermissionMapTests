@@ -24,6 +24,13 @@ namespace DBOUtils
 
         class LockedUserPermission
         {
+            public UserPermission GetPermission()
+            {
+                if (m_Exception!=null)
+                    throw m_Exception;
+                return m_Permission;
+            }
+
             public object m_Lock = new object();
             public UserPermission m_Permission = null;
             public Status m_Status = Status.Empty;
@@ -51,18 +58,14 @@ namespace DBOUtils
             {
                 if (lup.m_Status == Status.Created)
                 {
-                    if (lup.m_Exception != null)
-                        throw lup.m_Exception;
-                    return lup.m_Permission;
+                    return lup.GetPermission();
                 }
 
                 if (lup.m_Status == Status.Pending)
                 {
-                    Monitor.Wait(lup.m_Lock);           // wait until someone updates the data
-                    if (lup.m_Exception != null)
-                        throw lup.m_Exception;
-                    else
-                        return lup.m_Permission;
+                    while (lup.m_Status != Status.Created) // I am not sure about spurious wakeups
+                        Monitor.Wait(lup.m_Lock);           // wait until someone updates the data
+                    return lup.GetPermission();
                 }
                 else
                     lup.m_Status = Status.Pending;
